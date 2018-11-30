@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style type="text/css">
+		* {
+			margin: 0;
+			padding: 0;
+		}
+		canvas {
+			display: block;
+			margin: 0 auto;
+			border: 1px solid blue;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="myCanvas" width="360" height="512"></canvas>
+	<script type="text/javascript" src="js/Game.js"></script>
+	<script type="text/javascript" src="js/Bird.js"></script>
+	<script type="text/javascript" src="js/Pipe.js"></script>
+	<script type="text/javascript" src="js/Background.js"></script>
+	<script type="text/javascript">
+		/*分析：
+			像素鸟游戏是一只鸟在不停地穿过管子
+			同时， 地面向后撤 管子向后撤 背景也在后撤 但是背景比较远 所以移动的速度慢
+			分类： 
+			当前游戏一共可以分成几个类： 鸟、 管子、 背景（背景和地面）、游戏
+		*/
+		/*
+     继续分析：它们都需要一些图片  这些图片有["bird0_0.png", "bird0_1.png", "bird0_2.png", "bg_day.png", "land.png", "pipe_down.png", "pipe_up.png"]
+		 */
+		// 所需图片数组
+		var imgArr = ["images/bird0_0.png", "images/bird0_1.png", "images/bird0_2.png", "images/bg_day.png", "images/land.png", "images/pipe_down.png", "images/pipe_up.png"];
+		// 将代码放在数组中每一个图片都加载进来之后去执行
+		loadImage(imgArr, function(imgArr) {
+			// 获取元素
+			var canvas = document.getElementById("myCanvas");
+			// 获取画笔
+			var ctx = canvas.getContext("2d");
+			// 准备好参数
+			var bird = new Bird(imgArr.slice(0, 3), 100, 100);
+			var land = new Background(imgArr[4], 4, 0, 400);
+			var moutain = new Background(imgArr[3], 2, 0, 0);
+			var pipe = new Pipe(imgArr[5], imgArr[6], 4, 360);
+			window.g = new Game(ctx, bird, pipe, land, moutain);
+		});
+
+
+		// 定义一个函数 该函数接受两个参数: 一个数组 数组中每一个都是图片的地址 还接受一个回调函数
+		/* loadImage函数 用于加载图片并且 在所有图片加载完毕之后执行回调函数
+     * @arr  所接受的图片数组
+     * @callback  回调函数
+		 */
+		function loadImage(arr, callback) {
+			// 定义数组 用于接受加载完毕的图片元素的
+			var loadedImgArr = [];
+			// 定义信号量 计算有几张图片加载完成
+			var idx = 0;
+			// 循环加载图片
+			arr.forEach(function(value, index) {
+				// 初始化img元素
+				var img = new Image();
+				// 设置src
+				img.src = value;
+				// 设置onload事件
+				img.onload = function() {
+					// 因为onload事件执行顺序不一致 所以必须使用index来保证顺序
+				  loadedImgArr[index] = this;
+					// 加载进来一张图片就idx加一次
+					idx++;
+					// console.log("图片加载完成" + idx + "/" + arr.length);
+					// 判断 idx是否与数组长度相等
+					if(idx === arr.length) {
+						callback(loadedImgArr);
+					}
+				}
+			})
+		}
+	</script>
+</body>
+</html>
